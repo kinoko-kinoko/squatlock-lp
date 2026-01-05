@@ -26,3 +26,4 @@ dist-ssr
 # Backup files
 *.backup
 index.html.backup
+.vercel

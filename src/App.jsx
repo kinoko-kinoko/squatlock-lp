@@ -321,9 +321,9 @@ const App = () => {
           </div>
 
           <div className="flex gap-8 text-sm text-gray-400">
-            <a href="https://note.com/rich_hare1260/n/n98a7f5706032" target="_blank" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="https://www.saki-paru.com/squatlockapp-support-privacy-policy/" target="_blank" className="hover:text-white transition-colors">Privacy Policy</a>
 
-            <a href="https://note.com/rich_hare1260/n/n98a7f5706032" target="_blank" className="hover:text-white transition-colors">Support</a>
+            <a href="https://www.saki-paru.com/squatlockapp-support-privacy-policy/" target="_blank" className="hover:text-white transition-colors">Support</a>
           </div>
 
           <div className="text-sm text-gray-600">
