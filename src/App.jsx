@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { usePostHog } from 'posthog-js/react';
 import {
   Smartphone,
   Lock,
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react';
 
 const App = () => {
+  const posthog = usePostHog();
   const [scrolled, setScrolled] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
   const [howItWorksSlide, setHowItWorksSlide] = useState(0);
@@ -50,11 +52,28 @@ const App = () => {
     return () => clearTimeout(timeout);
   }, [howItWorksSlide, howItWorksContent.length]);
 
-  // Analytics placeholder function
-  // In a real implementation, this would trigger GA4 or Pixel events
-  const handleDownloadClick = (platform) => {
-    console.log(`Conversion Event: Download clicked for ${platform}`);
-    // Example: window.gtag('event', 'conversion', { 'send_to': 'AW-CONVERSION_ID/LABEL' });
+  // UTMパラメータを取得
+  const getUtmParams = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return {
+      utm_source: urlParams.get('utm_source'),
+      utm_medium: urlParams.get('utm_medium'),
+      utm_campaign: urlParams.get('utm_campaign'),
+    };
+  };
+
+  // App Storeクリックイベントをトラッキング
+  const handleDownloadClick = (location) => {
+    const utm = getUtmParams();
+
+    // PostHogにイベント送信
+    posthog?.capture('app_store_click', {
+      location,
+      page: 'landing',
+      ...utm,
+    });
+
+    console.log(`PostHog Event: app_store_click from ${location}`, utm);
     window.open('https://apps.apple.com/jp/app/squatlock/id6754959979', '_blank');
   };
 

@@ -27,3 +27,7 @@ dist-ssr
 *.backup
 index.html.backup
 .vercel
+
+# Environment variables
+.env
+.env.local

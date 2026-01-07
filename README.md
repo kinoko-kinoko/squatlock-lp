@@ -1,16 +1,69 @@
-# React + Vite
+# SquatLock LP
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+スクワットでスマホ依存を断つアプリ「SquatLock」のランディングページ。
 
-Currently, two official plugins are available:
+🌐 **本番URL**: https://squatlock.saki-paru.com
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## セットアップ
 
-## React Compiler
+```bash
+# リポジトリをクローン
+git clone https://github.com/kinoko-kinoko/SquatLock-LP.git
+cd SquatLock-LP
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+# 依存関係をインストール
+npm install
 
-## Expanding the ESLint configuration
+# 開発サーバーを起動
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 環境変数の設定（PostHog分析）
+
+1. [PostHog](https://posthog.com)でアカウントを作成
+2. Project Settings → Project API Keyをコピー
+3. `.env`ファイルを作成
+
+```bash
+cp .env.example .env
+# .envを編集してAPIキーを設定
+```
+
+## デプロイ
+
+```bash
+# Vercelにデプロイ
+npx vercel --prod
+```
+
+## ページ構成
+
+| パス | 説明 |
+|------|------|
+| `/` | メインランディングページ |
+| `/links` | SNSプロフィール用リンク集 |
+
+## UTMパラメータ
+
+SNSからの流入を計測するためのUTMパラメータ例：
+
+```
+# TikTok
+https://squatlock.saki-paru.com/links?utm_source=tiktok&utm_medium=profile
+
+# Instagram
+https://squatlock.saki-paru.com/links?utm_source=instagram&utm_medium=profile
+
+# YouTube
+https://squatlock.saki-paru.com/?utm_source=youtube&utm_medium=social&utm_campaign=動画ID
+
+# X (Twitter)
+https://squatlock.saki-paru.com/?utm_source=twitter&utm_medium=social
+```
+
+## 技術スタック
+
+- React + Vite
+- TailwindCSS v4
+- PostHog (アナリティクス)
+- react-router-dom (ルーティング)
