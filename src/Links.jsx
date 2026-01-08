@@ -1,10 +1,7 @@
 import React from 'react';
-import { usePostHog } from 'posthog-js/react';
 import { ExternalLink, Download, Globe, Twitter } from 'lucide-react';
 
 const Links = () => {
-  const posthog = usePostHog();
-
   // UTMパラメータを取得
   const getUtmParams = () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -15,13 +12,20 @@ const Links = () => {
     };
   };
 
+  // GA4にイベント送信
   const handleLinkClick = (linkName, url) => {
     const utm = getUtmParams();
-    posthog?.capture('link_click', {
-      link_name: linkName,
-      page: 'links',
-      ...utm,
-    });
+
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'link_click', {
+        event_category: 'engagement',
+        event_label: linkName,
+        page: 'links',
+        ...utm,
+      });
+    }
+
+    console.log(`GA4 Event: link_click - ${linkName}`, utm);
     window.open(url, '_blank');
   };
 

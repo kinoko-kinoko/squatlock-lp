@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { usePostHog } from 'posthog-js/react';
 import {
   Smartphone,
   Lock,
@@ -12,7 +11,6 @@ import {
 } from 'lucide-react';
 
 const App = () => {
-  const posthog = usePostHog();
   const [scrolled, setScrolled] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
   const [howItWorksSlide, setHowItWorksSlide] = useState(0);
@@ -62,18 +60,21 @@ const App = () => {
     };
   };
 
-  // App Storeクリックイベントをトラッキング
+  // App Storeクリックイベントをトラッキング (GA4)
   const handleDownloadClick = (location) => {
     const utm = getUtmParams();
 
-    // PostHogにイベント送信
-    posthog?.capture('app_store_click', {
-      location,
-      page: 'landing',
-      ...utm,
-    });
+    // GA4にイベント送信
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'app_store_click', {
+        event_category: 'engagement',
+        event_label: location,
+        page: 'landing',
+        ...utm,
+      });
+    }
 
-    console.log(`PostHog Event: app_store_click from ${location}`, utm);
+    console.log(`GA4 Event: app_store_click from ${location}`, utm);
     window.open('https://apps.apple.com/jp/app/squatlock/id6754959979', '_blank');
   };
 
