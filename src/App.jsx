@@ -15,6 +15,31 @@ const App = () => {
   const [slideIndex, setSlideIndex] = useState(0);
   const [howItWorksSlide, setHowItWorksSlide] = useState(0);
   const videoRef = useRef(null);
+
+  // ABテスト: CTAボタンのバリアント (A or B)
+  const [abVariant, setAbVariant] = useState(() => {
+    // LocalStorageから既存のバリアントを取得、なければランダムに決定
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('ab_cta_variant');
+      if (stored === 'A' || stored === 'B') return stored;
+      const newVariant = Math.random() < 0.5 ? 'A' : 'B';
+      localStorage.setItem('ab_cta_variant', newVariant);
+      return newVariant;
+    }
+    return 'A';
+  });
+
+  // ABテスト: ページ読み込み時にdataLayerにイベントを送信
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'ab_test',
+        experiment_id: 'cta_button_v1',
+        variant: abVariant
+      });
+    }
+  }, [abVariant]);
+
   const slides = ['/lock.png', '/squat.png', '/success.png'];
   // How it Works: 画像2枚 + 動画1つ (type: 'image' or 'video')
   const howItWorksContent = [
@@ -22,6 +47,7 @@ const App = () => {
     { type: 'image', src: '/step2_count.png' },
     { type: 'video', src: '/demo.m4v' }
   ];
+
 
   // Scroll detection for navbar styling
   useEffect(() => {
@@ -64,17 +90,29 @@ const App = () => {
   const handleDownloadClick = (location) => {
     const utm = getUtmParams();
 
-    // GA4にイベント送信
+    // GA4にイベント送信（ABテストバリアント情報を含む）
     if (typeof window.gtag === 'function') {
       window.gtag('event', 'app_store_click', {
         event_category: 'engagement',
         event_label: location,
         page: 'landing',
+        experiment_id: 'cta_button_v1',
+        variant: abVariant,
         ...utm,
       });
     }
 
-    console.log(`GA4 Event: app_store_click from ${location}`, utm);
+    // dataLayerにもイベントを送信（GTM用）
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'cta_click',
+        experiment_id: 'cta_button_v1',
+        variant: abVariant,
+        click_location: location
+      });
+    }
+
+    console.log(`GA4 Event: app_store_click from ${location}, variant: ${abVariant}`, utm);
     window.open('https://apps.apple.com/jp/app/squatlock/id6754959979', '_blank');
   };
 
@@ -143,21 +181,39 @@ const App = () => {
                 </p>
               </div>
 
-              {/* CTA Button Area */}
+              {/* CTA Button Area - ABテスト対応 */}
               <div className="pt-6 w-full max-w-lg">
-                <button
-                  onClick={() => handleDownloadClick('Hero Primary')}
-                  className="w-full group relative inline-flex items-center justify-center gap-4 bg-neon-green text-black px-6 py-4 rounded-xl hover:bg-white transition-all duration-300 shadow-[0_0_30px_rgba(204,255,0,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.4)]"
-                >
-                  {/* Apple Logo SVG */}
-                  <svg className="w-10 h-10 fill-current" viewBox="0 0 384 512">
-                    <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 52.3-11.4 69.5-34.3z" />
-                  </svg>
-                  <div className="flex flex-col items-start leading-none">
-                    <span className="text-xs font-bold uppercase tracking-wider mb-1 opacity-80">Download on the</span>
-                    <span className="text-2xl font-black tracking-tighter">App Store</span>
-                  </div>
-                </button>
+                {abVariant === 'A' ? (
+                  // バリアントA: 現行デザイン（緑背景・英語）
+                  <button
+                    onClick={() => handleDownloadClick('Hero Primary')}
+                    className="w-full group relative inline-flex items-center justify-center gap-4 bg-neon-green text-black px-6 py-4 rounded-xl hover:bg-white transition-all duration-300 shadow-[0_0_30px_rgba(204,255,0,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.4)]"
+                  >
+                    {/* Apple Logo SVG */}
+                    <svg className="w-10 h-10 fill-current" viewBox="0 0 384 512">
+                      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 52.3-11.4 69.5-34.3z" />
+                    </svg>
+                    <div className="flex flex-col items-start leading-none">
+                      <span className="text-xs font-bold uppercase tracking-wider mb-1 opacity-80">Download on the</span>
+                      <span className="text-2xl font-black tracking-tighter">App Store</span>
+                    </div>
+                  </button>
+                ) : (
+                  // バリアントB: 白背景・日本語
+                  <button
+                    onClick={() => handleDownloadClick('Hero Primary')}
+                    className="w-full group relative inline-flex items-center justify-center gap-4 bg-white text-black border-2 border-neon-green px-6 py-4 rounded-xl hover:bg-neon-green transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_50px_rgba(204,255,0,0.4)]"
+                  >
+                    {/* Apple Logo SVG */}
+                    <svg className="w-10 h-10 fill-current" viewBox="0 0 384 512">
+                      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 52.3-11.4 69.5-34.3z" />
+                    </svg>
+                    <div className="flex flex-col items-start leading-none">
+                      <span className="text-xs font-bold uppercase tracking-wider mb-1 opacity-60">完全無料</span>
+                      <span className="text-2xl font-black tracking-tighter">ダウンロード</span>
+                    </div>
+                  </button>
+                )}
               </div>
             </div>
           </div>
