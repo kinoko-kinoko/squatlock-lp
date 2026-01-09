@@ -13,7 +13,7 @@ SquatLock LPにCTAボタンのABテストを実装しました。GA4でのトラ
 | **実験ID** | `cta_button_v1` |
 | **対象** | ヒーローセクションのCTAボタン |
 | **バリアントA** | 緑背景・英語（Download on the App Store） |
-| **バリアントB** | 白背景・英語（100% Free / Download Now） |
+| **バリアントB** | 白背景・英語（Download Now） |
 | **振り分け** | 50/50（ランダム、LocalStorage保存で一貫性維持） |
 
 ---
